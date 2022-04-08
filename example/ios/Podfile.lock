@@ -1,0 +1,22 @@
+PODS:
+  - epos2_printer (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+
+DEPENDENCIES:
+  - epos2_printer (from `.symlinks/plugins/epos2_printer/ios`)
+  - Flutter (from `Flutter`)
+
+EXTERNAL SOURCES:
+  epos2_printer:
+    :path: ".symlinks/plugins/epos2_printer/ios"
+  Flutter:
+    :path: Flutter
+
+SPEC CHECKSUMS:
+  epos2_printer: fe175c73161bcfce5fda5641719192c1a6990604
+  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
+
+PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+
+COCOAPODS: 1.11.2
