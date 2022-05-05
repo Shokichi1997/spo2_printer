@@ -42,7 +42,7 @@ class DiscoveryStreamHandler: NSObject, FlutterStreamHandler, Epos2DiscoveryDele
 	
 	func onDiscovery(_ deviceInfo: Epos2DeviceInfo!) {
 		let device = [
-			"Name": deviceInfo.deviceName,
+			"PrinterName": deviceInfo.deviceName,
 			"Target": deviceInfo.target
 		]
 		printerList.append(device)

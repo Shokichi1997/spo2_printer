@@ -68,7 +68,7 @@ public class ShowMsg {
         });
     }
 
-    private static String getEposExceptionText(int state) {
+    public static String getEposExceptionText(int state) {
         String return_text = "";
         switch (state) {
             case    Epos2Exception.ERR_PARAM:

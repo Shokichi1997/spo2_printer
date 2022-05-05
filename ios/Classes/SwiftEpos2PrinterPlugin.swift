@@ -22,6 +22,8 @@ public class SwiftEpos2PrinterPlugin: NSObject, FlutterPlugin {
 		
 		let eventChannel = FlutterEventChannel(name: "epos2_printer_event", binaryMessenger: registrar.messenger())
 		eventChannel.setStreamHandler(instance._discoveryStreamHandler)
+		
+		instance.initializePrinterObject();
 	}
 
 	public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -65,9 +67,6 @@ public class SwiftEpos2PrinterPlugin: NSObject, FlutterPlugin {
 			case "stopFindPrinter":
 				stopFindPrinter(call, result)
 				break
-			case "testPlugin":
-				testPlugin(call, result)
-				break
 			default:
 				result(nil)
 		}
@@ -89,15 +88,15 @@ public class SwiftEpos2PrinterPlugin: NSObject, FlutterPlugin {
 		var printerResult: Int32 = EPOS2_SUCCESS.rawValue
 		
 		if printer == nil {
-			result(FlutterError.init(code: "111", message: "Printer configuration setting error", details: ))
+			result(FlutterError.init(code: "102", message: "Printer not init yet", details: nil))
 			return
 		}
 		printerResult = printer!.connect(target, timeout:Int(EPOS2_PARAM_DEFAULT))
 		if printerResult != EPOS2_SUCCESS.rawValue {
-			result(false)
+			result(FlutterError.init(code: String(printerResult), message: Epos2Message.getEposMessage(printerResult), details: nil))
 			return
 		}
-		
+		result(true)
 	}
 	
 	func addText(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
@@ -108,7 +107,7 @@ public class SwiftEpos2PrinterPlugin: NSObject, FlutterPlugin {
 		printerResult = printer!.addText(text)
 		
 		if printerResult != EPOS2_SUCCESS.rawValue {
-			result(false)
+			result(FlutterError.init(code: String(printerResult), message: Epos2Message.getEposMessage(printerResult), details: nil))
 			return
 		}
 		result(true)
@@ -148,7 +147,7 @@ public class SwiftEpos2PrinterPlugin: NSObject, FlutterPlugin {
 									 compress: compress ?? EPOS2_COMPRESS_AUTO.rawValue)
 		
 		if printerResult != EPOS2_SUCCESS.rawValue {
-			result(false)
+			result(FlutterError.init(code: String(printerResult), message: Epos2Message.getEposMessage(printerResult), details: nil))
 			return
 		}
 		result(true)
@@ -162,7 +161,7 @@ public class SwiftEpos2PrinterPlugin: NSObject, FlutterPlugin {
 		printerResult = printer!.addFeedLine(line ?? 1)
 		
 		if printerResult != EPOS2_SUCCESS.rawValue {
-			result(false)
+			result(FlutterError.init(code: String(printerResult), message: Epos2Message.getEposMessage(printerResult), details: nil))
 			return
 		}
 		result(true)
@@ -178,7 +177,7 @@ public class SwiftEpos2PrinterPlugin: NSObject, FlutterPlugin {
 		
 		printerResult = printer!.disconnect()
 		if printerResult != EPOS2_SUCCESS.rawValue {
-			result(false)
+			result(FlutterError.init(code: String(printerResult), message: Epos2Message.getEposMessage(printerResult), details: nil))
 		} else {
 			result(true)
 		}
@@ -195,7 +194,7 @@ public class SwiftEpos2PrinterPlugin: NSObject, FlutterPlugin {
 		printerResult = printer!.addTextSize(width ?? 1, height: height ?? 1)
 		
 		if printerResult != EPOS2_SUCCESS.rawValue {
-			result(false)
+			result(FlutterError.init(code: String(printerResult), message: Epos2Message.getEposMessage(printerResult), details: nil))
 			return
 		}
 		result(true)
@@ -209,7 +208,7 @@ public class SwiftEpos2PrinterPlugin: NSObject, FlutterPlugin {
 		printerResult = printer!.addCut(type ?? EPOS2_CUT_FEED.rawValue)
 		
 		if printerResult != EPOS2_SUCCESS.rawValue {
-			result(false)
+			result(FlutterError.init(code: String(printerResult), message: Epos2Message.getEposMessage(printerResult), details: nil))
 			return
 		}
 		result(true)
@@ -223,7 +222,7 @@ public class SwiftEpos2PrinterPlugin: NSObject, FlutterPlugin {
 		printerResult = printer!.addTextAlign(type ?? EPOS2_ALIGN_LEFT.rawValue)
 		
 		if printerResult != EPOS2_SUCCESS.rawValue {
-			result(false)
+			result(FlutterError.init(code: String(printerResult), message: Epos2Message.getEposMessage(printerResult), details: nil))
 			return
 		}
 		result(true)
@@ -247,7 +246,7 @@ public class SwiftEpos2PrinterPlugin: NSObject, FlutterPlugin {
 		if printerResult != EPOS2_SUCCESS.rawValue {
 			printer!.clearCommandBuffer()
 			printer!.disconnect()
-			result(false)
+			result(FlutterError.init(code: String(printerResult), message: Epos2Message.getEposMessage(printerResult), details: nil))
 			return
 		}
 		
@@ -262,7 +261,7 @@ public class SwiftEpos2PrinterPlugin: NSObject, FlutterPlugin {
 		printerResult = printer!.addLineSpace(lineSpace ?? 1)
 		
 		if printerResult != EPOS2_SUCCESS.rawValue {
-			result(false)
+			result(FlutterError.init(code: String(printerResult), message: Epos2Message.getEposMessage(printerResult), details: nil))
 			return
 		}
 		result(true)
@@ -276,7 +275,7 @@ public class SwiftEpos2PrinterPlugin: NSObject, FlutterPlugin {
 		printerResult = printer!.addTextFont(font ?? EPOS2_FONT_A.rawValue)
 		
 		if printerResult != EPOS2_SUCCESS.rawValue {
-			result(false)
+			result(FlutterError.init(code: String(printerResult), message: Epos2Message.getEposMessage(printerResult), details: nil))
 			return
 		}
 		result(true)
@@ -285,9 +284,4 @@ public class SwiftEpos2PrinterPlugin: NSObject, FlutterPlugin {
 	func stopFindPrinter(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 		self.discoveryStreamHandler?.stopDescovery()
 	}
-	
-	func testPlugin(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-		result(FlutterError.init(code: "111", message: "Message", details: nil))
-	}
-	
 }

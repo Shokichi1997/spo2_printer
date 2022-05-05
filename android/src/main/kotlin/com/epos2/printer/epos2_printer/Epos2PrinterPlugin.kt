@@ -1,7 +1,6 @@
 package com.epos2.printer.epos2_printer
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.annotation.NonNull
 import com.epson.epos2.Epos2Exception
@@ -12,7 +11,6 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import java.io.File
 
 
 /** Epos2PrinterPlugin */
@@ -62,13 +60,8 @@ class Epos2PrinterPlugin : FlutterPlugin, MethodCallHandler {
             "addLineSpace" -> addLineSpace(call, result)
             "addTextFont" -> addTextFont(call, result)
             "stopFindPrinter" -> stopFindPrinter(call, result)
-            "testPlugin" -> testPlugin(call, result)
             else -> result.notImplemented()
         }
-    }
-
-    private fun testPlugin(call: MethodCall, result: Result) {
-        result.error("101", "xin chao", 1)
     }
 
     private fun stopFindPrinter(call: MethodCall, result: Result) {
@@ -86,50 +79,45 @@ class Epos2PrinterPlugin : FlutterPlugin, MethodCallHandler {
             mPrinter!!.addTextFont(font ?: Printer.FONT_A)
         } catch (e: Exception) {
             mPrinter?.clearCommandBuffer()
-            ShowMsg.showException(e, "addTextFont", mContext)
-            result.error("102", e.message, null)
+            sendError(e, result)
         }
+    }
+
+    private fun sendError(e: Exception, result: Result) {
+        val errorMessage = getExceptionMessage(e)
+        result.error(errorMessage["statusCode"].toString(), errorMessage["message"].toString(), errorMessage)
     }
 
     private fun addLineSpace(call: MethodCall, result: Result) {
         val args = call.arguments as? Map<*, *> ?: return
         val lineSpace = args["lineSpace"] as? Int
-        if (mPrinter == null) {
-            result.error("101", "Printer not init yet.", null)
-            return
-        }
+        if (mPrinter == null) return
+
         try {
             mPrinter!!.addLineSpace(lineSpace ?: 1)
         } catch (e: Exception) {
             mPrinter?.clearCommandBuffer()
-            ShowMsg.showException(e, "addLineSpace", mContext)
-            result.error("102", e.message, null)
+            sendError(e, result)
         }
     }
 
     private fun printData(call: MethodCall, result: Result) {
-        if (mPrinter == null) {
-            result.error("101", "Printer not init yet.", null)
-            return
-        }
+        if (mPrinter == null) return
         try {
             mPrinter!!.sendData(Printer.PARAM_DEFAULT)
         } catch (e: Exception) {
             mPrinter!!.clearCommandBuffer()
-            ShowMsg.showException(e, "sendData", mContext)
             try {
                 mPrinter!!.disconnect()
             } catch (e: Exception) {
             }
-            result.error("104", "Can't not print data.", null)
+            sendError(e, result)
         }
         result.success(true)
     }
 
     private fun disconnect(call: MethodCall, result: Result) {
-        if (mPrinter == null) {
-            return
-        }
+        if (mPrinter == null) return
         while (true) {
             try {
                 mPrinter!!.disconnect()
@@ -143,11 +131,11 @@ class Epos2PrinterPlugin : FlutterPlugin, MethodCallHandler {
                         } catch (e: Exception) {
                         }
                     } else {
-                        result.error("103", e.message, null)
+                        sendError(e, result)
                         break
                     }
                 } else {
-                    result.error("103", e.message, null)
+                    sendError(e, result)
                     break
                 }
             }
@@ -157,7 +145,7 @@ class Epos2PrinterPlugin : FlutterPlugin, MethodCallHandler {
 
     private fun isConnected(call: MethodCall, result: Result) {
         if (mPrinter == null) {
-            result.error("101", "Printer not init yet.", null)
+            result.success(0)
             return
         }
         val status = mPrinter!!.status
@@ -167,32 +155,24 @@ class Epos2PrinterPlugin : FlutterPlugin, MethodCallHandler {
     private fun addTextAlign(call: MethodCall, result: Result) {
         val args = call.arguments as? Map<*, *> ?: return
         val align = args["align"] as? Int
-        if (mPrinter == null) {
-            result.error("101", "Printer not init yet.", null)
-            return
-        }
+        if (mPrinter == null) return
         try {
             mPrinter!!.addTextAlign(align ?: Printer.ALIGN_LEFT)
         } catch (e: Exception) {
             mPrinter?.clearCommandBuffer()
-            ShowMsg.showException(e, "addTextAlign", mContext)
-            result.error("102", e.message, null)
+            sendError(e, result)
         }
     }
 
     private fun addCut(call: MethodCall, result: Result) {
         val args = call.arguments as? Map<*, *> ?: return
         val type = args["type"] as? Int
-        if (mPrinter == null) {
-            result.error("101", "Printer not init yet.", null)
-            return
-        }
+        if (mPrinter == null) return
         try {
             mPrinter!!.addCut(type ?: Printer.CUT_FEED)
         } catch (e: Exception) {
             mPrinter?.clearCommandBuffer()
-            ShowMsg.showException(e, "addCut", mContext)
-            result.error("102", e.message, null)
+            sendError(e, result)
         }
     }
 
@@ -200,38 +180,30 @@ class Epos2PrinterPlugin : FlutterPlugin, MethodCallHandler {
         val args = call.arguments as? Map<*, *> ?: return
         val width = args["width"] as? Int
         val height = args["height"] as? Int
-        if (mPrinter == null) {
-            result.error("101", "Printer not init yet.", null)
-            return
-        }
+        if (mPrinter == null) return
         try {
             mPrinter!!.addTextSize(width ?: 1, height ?: 1)
         } catch (e: Exception) {
             mPrinter?.clearCommandBuffer()
-            ShowMsg.showException(e, "addTextSize", mContext)
-            result.error("102", e.message, null)
+            sendError(e, result)
         }
     }
 
     private fun addFeedLine(call: MethodCall, result: Result) {
         val args = call.arguments as? Map<*, *> ?: return
         val line = args["line"] as? Int
-        if (mPrinter == null) {
-            result.error("101", "Printer not init yet.", null)
-            return
-        }
+        if (mPrinter == null) return
         try {
             mPrinter!!.addFeedLine(line ?: 1)
         } catch (e: Exception) {
             mPrinter?.clearCommandBuffer()
-            ShowMsg.showException(e, "addFeedLine", mContext)
-            result.error("102", e.message, null)
+            sendError(e, result)
         }
     }
 
     private fun addImage(call: MethodCall, result: Result) {
         val args = call.arguments as? Map<*, *> ?: return
-        val imagePath = args["imagePath"] as String
+        val image = args["image"] as ArrayList<Int>
         val x = args["x"] as? Int
         val y = args["y"] as? Int
         val width = args["width"] as? Int
@@ -242,14 +214,9 @@ class Epos2PrinterPlugin : FlutterPlugin, MethodCallHandler {
         val brightness = args["brightness"] as? Double
         val compress = args["compress"] as? Int
 
-        if (mPrinter == null) {
-            result.error("101", "Printer not init yet.", null)
-            return
-        }
-        val filePath = mFlutterPluginBinding.flutterAssets.getAssetFilePathByName(imagePath)
-        val imageFile = File(filePath)
-        val bmOptions: BitmapFactory.Options = BitmapFactory.Options()
-        val bitmap = BitmapFactory.decodeFile(imageFile.absolutePath, bmOptions)
+        if (mPrinter == null) return
+        val array = (image).map { it.toByte() }.toByteArray()
+        val bitmap = BitmapFactory.decodeByteArray(array, 0, array.size)
         try {
             mPrinter!!.addImage(
                 bitmap,
@@ -265,24 +232,19 @@ class Epos2PrinterPlugin : FlutterPlugin, MethodCallHandler {
             )
         } catch (e: Exception) {
             mPrinter?.clearCommandBuffer()
-            ShowMsg.showException(e, "addText", mContext)
-            result.error("102", e.message, null)
+            sendError(e, result)
         }
     }
 
     private fun addText(call: MethodCall, result: Result) {
         val args = call.arguments as? Map<*, *> ?: return
         val text = args["text"] as String
-        if (mPrinter == null) {
-            result.error("101", "Printer not init yet.", null)
-            return
-        }
+        if (mPrinter == null) return
         try {
             mPrinter!!.addText(text)
         } catch (e: Exception) {
             mPrinter?.clearCommandBuffer()
-            ShowMsg.showException(e, "addText", mContext)
-            result.error("102", e.message, null)
+            sendError(e, result)
         }
     }
 
@@ -291,7 +253,6 @@ class Epos2PrinterPlugin : FlutterPlugin, MethodCallHandler {
             mPrinter = Printer(defaultPrinter, defaultLang, mContext)
 //            mPrinter!!.setReceiveEventListener(this)
         } catch (e: Exception) {
-            ShowMsg.showException(e, "Printer", mContext)
             return false
         }
         return true
@@ -300,17 +261,30 @@ class Epos2PrinterPlugin : FlutterPlugin, MethodCallHandler {
     private fun connectPrinter(call: MethodCall, result: Result) {
         val args = call.arguments as? Map<*, *> ?: return
         val printerAddress = args["address"] as String
-        if (mPrinter == null) {
-            result.error("102", "Printer not init yet", null)
-            return
-        }
+        if (mPrinter == null) return
+
         try {
             mPrinter!!.connect(printerAddress, Printer.PARAM_DEFAULT)
         } catch (e: Exception) {
-            ShowMsg.showException(e, "connect", mContext)
-            result.error("103", e.message, null)
+            sendError(e, result)
             return
         }
         result.success("Connect successful")
+    }
+
+    private fun getExceptionMessage(e: Exception): Map<String, Any> {
+        var message = mapOf<String, Any>()
+        message = if (e is Epos2Exception) {
+            mapOf(
+                "statusCode" to e.errorStatus,
+                "message" to ShowMsg.getEposExceptionText(e.errorStatus)
+            )
+        } else {
+            mapOf(
+                "message" to e.toString(),
+                "statusCode" to "4000"
+            )
+        }
+        return message
     }
 }

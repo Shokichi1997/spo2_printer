@@ -60,106 +60,121 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 16.0),
-          InkWell(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => DiscoveryScreen(
-                    onSelectedPrinter: (String? target) {
-                      this.target = target;
-                    },
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 16.0),
+            InkWell(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => DiscoveryScreen(
+                      onSelectedPrinter: (String? target) {
+                        this.target = target;
+                      },
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 22.0),
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                child: const Center(
+                  child: Text(
+                    'Discovery',
+                    style: TextStyle(color: Colors.white, fontSize: 18.0),
                   ),
                 ),
-              );
-            },
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 22.0),
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(20.0),
               ),
-              child: const Center(
-                child: Text(
-                  'Discovery',
-                  style: TextStyle(color: Colors.white, fontSize: 18.0),
+            ),
+            const SizedBox(height: 8.0),
+            const Text(
+              'Target',
+              style: TextStyle(color: Colors.black, fontSize: 18.0),
+            ),
+            const SizedBox(height: 12.0),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width / 2,
+                child: TextField(
+                  readOnly: true,
+                  decoration: const InputDecoration(border: OutlineInputBorder()),
+                  controller: targetController,
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 8.0),
-          const Text(
-            'Target',
-            style: TextStyle(color: Colors.black, fontSize: 18.0),
-          ),
-          const SizedBox(height: 12.0),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width / 2,
-              child: TextField(
-                readOnly: true,
-                decoration: const InputDecoration(border: OutlineInputBorder()),
-                controller: targetController,
+            const SizedBox(height: 28.0),
+            Container(
+              padding: const EdgeInsets.all(24.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20.0),
+                border: Border.all(),
+              ),
+              child: Column(
+                children: [
+                  getGroupButton(
+                      label1: 'Connect',
+                      onTap1: () => handleButton(() => Epos2Printer.connectPrinter(target)),
+                      label2: 'Disconnect',
+                      onTap2: () => handleButton(() => Epos2Printer.disconnect())),
+                  getGroupButton(
+                      label1: 'Add text',
+                      onTap1: () => handleButton(() => Epos2Printer.addText('Sample text')),
+                      label2: 'Add Image',
+                      onTap2: () => handleButton(() => Epos2Printer.addImage('assets/images/logo.png'))),
+                  getGroupButton(
+                      label1: 'Add line space',
+                      onTap1: () => handleButton(() => Epos2Printer.addLineSpace(1)),
+                      label2: 'Add feed line',
+                      onTap2: () => handleButton(() => Epos2Printer.addFeedLine(1))),
+                  getGroupButton(
+                      label1: 'Add text size',
+                      onTap1: () => handleButton(() => Epos2Printer.addTextSize(width: 2, height: 2)),
+                      label2: 'Add text align',
+                      onTap2: () => handleButton(() => Epos2Printer.addTextAlign(PosAlign.ALIGN_RIGHT))),
+                  getGroupButton(
+                      label1: 'Add text font',
+                      onTap1: () => handleButton(() => Epos2Printer.addTextFont(PosFont.FONT_B)),
+                      label2: 'Print recieve',
+                      onTap2: () => handleButton(() => Epos2Printer.printData())),
+                  getGroupButton(
+                      label1: 'isConnected',
+                      onTap1: () async {
+                        var isConnected = await Epos2Printer.isConnected();
+                        String message;
+                        if (isConnected) {
+                          message = 'Connected';
+                        } else {
+                          message = 'Not connected';
+                        }
+                        showDialog(context, message);
+                      },
+                      label2: '',
+                      onTap2: () {}),
+                ],
               ),
             ),
-          ),
-          const SizedBox(height: 28.0),
-          Container(
-            padding: const EdgeInsets.all(24.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(),
-            ),
-            child: Column(
-              children: [
-                getGroupButton(
-                    label1: 'Connect',
-                    onTap1: () => handleButton(() => Epos2Printer.connectPrinter(target)),
-                    label2: 'Disconnect',
-                    onTap2: () => handleButton(() => Epos2Printer.disconnect())),
-                getGroupButton(
-                    label1: 'Add text',
-                    onTap1: () => handleButton(() => Epos2Printer.addText('Sample text')),
-                    label2: 'Add Image',
-                    onTap2: () => handleButton(() => Epos2Printer.addImage('assets/images/logo.png'))),
-                getGroupButton(
-                    label1: 'Add line space',
-                    onTap1: () => handleButton(() => Epos2Printer.addLineSpace(1)),
-                    label2: 'Add feed line',
-                    onTap2: () => handleButton(() => Epos2Printer.addFeedLine(1))),
-                getGroupButton(
-                    label1: 'Add text size',
-                    onTap1: () => handleButton(() => Epos2Printer.addTextSize(width: 2, height: 2)),
-                    label2: 'Add text align',
-                    onTap2: () => handleButton(() => Epos2Printer.addTextAlign(PosAlign.ALIGN_RIGHT))),
-                getGroupButton(
-                    label1: 'Add text font',
-                    onTap1: () => handleButton(() => Epos2Printer.addTextFont(PosFont.FONT_B)),
-                    label2: 'Print recieve',
-                    onTap2: () => handleButton(() => Epos2Printer.printData())),
-                getGroupButton(
-                    label1: 'Test Plugin',
-                    onTap1: () => handleButton(() => Epos2Printer.testPlugin()),
-                    label2: 'Print recieve',
-                    onTap2: () => handleButton(() => Epos2Printer.printData())),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   void handleButton(Future<void> Function() param) async {
-    param.call();
-    return;
     if (target != null && await Epos2Printer.isConnected()) {
-      param.call();
+      try {
+        await param.call();
+      } on PlatformException catch (e) {
+        showDialog(context, '${e.message.toString()} - code:${e.code}');
+      } catch (e) {
+        showDialog(context, e.toString());
+      }
     } else {
       showDialog(context, 'Please connect to printer first');
     }
